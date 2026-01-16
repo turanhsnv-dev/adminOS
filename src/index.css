@@ -30,7 +30,7 @@
  
   /* DARK MODE RƏNGLƏRİ (Sinif gələndə aktivləşəcək) */
   .dark {
-    --background: 240 10% 3.9%;    /* Tünd fon */
+    --background: 240 10% 2%;    /* Tünd fon */
     --foreground: 0 0% 98%;        /* Ağ mətn */
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;

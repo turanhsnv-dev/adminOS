@@ -31,10 +31,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     <aside 
       className={cn(
         "fixed left-4 top-4 bottom-4 z-40 rounded-2xl transition-all duration-300 flex flex-col",
-        // KÖLGƏ AZALDILDI: Artıq shadow-2xl yox, daha yüngül shadow-xl və opacity azaldıldı
-        "shadow-xl shadow-black/5 dark:shadow-black/20",
+        "shadow-2xl shadow-black/10 dark:shadow-black/40",
         "bg-card/80 dark:bg-[#09090b]/80 backdrop-blur-xl",
-        "border border-black/5 dark:border-white/5", // Border rəngi də yumşaldıldı
+        "border border-black/5 dark:border-white/10",
         isOpen ? "w-64" : "w-20"
       )}
     >
@@ -44,7 +43,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         isOpen ? "justify-start px-6" : "justify-center"
       )}>
         <div className="flex items-center gap-3 font-bold text-xl tracking-tight text-foreground">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-neon dark:bg-neon/10 flex items-center justify-center shadow-sm shrink-0 transition-all">
+          {/* Logo qutusu: Dark modda Neon çərçivə və parıltı */}
+          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-neon dark:bg-neon/10 dark:shadow-[0_0_10px_rgba(6,182,212,0.4)] flex items-center justify-center shadow-sm shrink-0 transition-all">
             AO
           </div>
           {isOpen && (
@@ -56,7 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
 
         <button 
           onClick={toggleSidebar}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-background border border-border/50 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary dark:hover:text-neon transition-all shadow-sm z-50"
+          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-background border border-border/50 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary dark:hover:text-neon hover:border-primary dark:hover:border-neon transition-all shadow-sm z-50"
         >
           {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
         </button>
@@ -70,31 +70,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             to={item.url}
             end={item.url === "/dashboard"}
             className={({ isActive }) => cn(
-              "flex items-center py-3 rounded-xl transition-all duration-200 group relative",
+              "flex items-center py-3 rounded-xl transition-all duration-300 group relative",
               isOpen ? "px-4 gap-3 justify-start" : "px-0 justify-center",
-              
-              // CRITICAL FIX: "Oynama" olmaması üçün həmişə border var, sadəcə transparentdir
-              "border border-transparent",
 
               // --- İNAKTİV HAL ---
               !isActive && [
                   "text-muted-foreground cursor-pointer",
                   "hover:text-foreground hover:bg-accent/50",
-                  "dark:hover:text-neon dark:hover:bg-neon/5" // Hover kölgəsi azaldıldı
+                  // Dark modda hover edəndə neon rəng gəlsin
+                  "dark:hover:text-neon dark:hover:bg-neon/10"
               ],
               
-              // --- AKTİV HAL ---
+              // --- AKTİV HAL (NEON SEHRI BURADADIR) ---
               isActive && [
                   "cursor-default font-medium",
                   
-                  // LIGHT MODE: 
-                  "bg-primary text-white shadow-sm shadow-primary/20", // Shadow-md -> Shadow-sm oldu
+                  // LIGHT MODE: Standart bütöv yaşıl rəng
+                  "bg-primary text-white shadow-md shadow-primary/25",
                   
-                  // DARK MODE (Neon): 
-                  "dark:bg-transparent dark:text-neon", 
-                  "dark:border-neon/30", // Border rəngi daha soft oldu
-                  "dark:shadow-[inset_0_0_10px_-5px_rgba(6,182,212,0.2)]", // İç parıltı azaldıldı
-                  // Drop-shadow tam silindi ki, çox göz yormasın
+                  // DARK MODE: Şəffaf fon + Neon Parıltı + Neon Yazı 🔥
+                  "dark:bg-transparent dark:text-neon", // Arxa planı silirik
+                  "dark:border dark:border-neon/50", // İncə çərçivə
+                  "dark:shadow-[inset_0_0_15px_-5px_rgba(6,182,212,0.3)]", // İçəriyə doğru parıltı
+                  "dark:drop-shadow-[0_0_5px_rgba(6,182,212,0.5)]" // Kənara doğru parıltı
               ]
             )}
           >
@@ -102,8 +100,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
                 <>
                     <item.icon className={cn(
                         "w-5 h-5 shrink-0 transition-all duration-300", 
+                        
+                        // İKON RƏNGLƏRİ:
+                        // Light Active: Ağ
+                        // Dark Active: Neon + Parıltı (Glow)
                         isActive 
-                            ? "text-white dark:text-neon" // Drop-shadow silindi, təmiz neon rəng qaldı
+                            ? "text-white dark:text-neon dark:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" 
                             : "group-hover:text-primary dark:group-hover:text-neon"
                     )} />
                     
@@ -127,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
       {/* 3. FOOTER */}
       <div className="p-4 mb-2 border-t border-border/5">
         <button className={cn(
-            "flex items-center w-full py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all border border-transparent",
+            "flex items-center w-full py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all",
             isOpen ? "px-4 gap-3 justify-start" : "px-0 justify-center"
         )}>
            <LogOut className="w-5 h-5 shrink-0" />

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Plus,
-  Search,
   Pencil,
   Trash2,
   Eye,
@@ -48,35 +47,22 @@ export const SliderPage = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* --- HEADER --- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
             Sliderlər
           </h1>
           <p className="text-muted-foreground mt-1">
-            Ana səhifənin vitrinini buradan idarə edin.
+            Ana səhifənin sliderlərini buradan idarə edin.
           </p>
         </div>
-
         <div className="flex items-center gap-3">
-          <div className="relative group hidden sm:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <input
-              type="text"
-              placeholder="Axtarış..."
-              className="h-10 pl-9 pr-4 rounded-xl bg-white/50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 transition-all"
-            />
-          </div>
-
           <Button className="dark:bg-neon dark:text-black dark:hover:bg-neon/90 rounded-xl px-6 shadow-lg shadow-primary/20 dark:shadow-neon/20 transition-all hover:scale-105 active:scale-95">
             <Plus className="w-4 h-4 mr-2" />
             Yeni Slider
           </Button>
         </div>
       </div>
-
-      {/* --- TABLE --- */}
       <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl shadow-xl shadow-black/5 overflow-hidden">
         <div className="w-full overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -94,14 +80,12 @@ export const SliderPage = () => {
                 </th>
               </tr>
             </thead>
-
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {data.map((item) => (
                 <tr
                   key={item.id}
                   className="group hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200"
                 >
-                  {/* 1. Şəkil */}
                   <td className="px-6 py-4">
                     <div className="w-32 h-20 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-sm relative group-hover:scale-105 transition-transform duration-300">
                       {item.image ? (
@@ -118,15 +102,11 @@ export const SliderPage = () => {
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                     </div>
                   </td>
-
-                  {/* 2. Məzmun (Alt Text) - Düzəliş edildi */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      {/* Yazı İkonu (Uyğun İkon) */}
                       <div className="p-2 rounded-lg bg-primary/5 text-primary dark:text-neon dark:bg-neon/10 shrink-0 border border-primary/10 dark:border-neon/10">
                         <Type className="w-4 h-4" />
                       </div>
-
                       <span className="font-medium text-foreground text-sm line-clamp-2">
                         {item.alt} Lorem ipsum dolor sit amet consectetur
                         adipisicing elit. Sunt aut perferendis nostrum error
@@ -139,8 +119,6 @@ export const SliderPage = () => {
                       </span>
                     </div>
                   </td>
-
-                  {/* 3. Status */}
                   <td className="px-6 py-4">
                     <div
                       className={cn(
@@ -161,8 +139,6 @@ export const SliderPage = () => {
                       {item.status === "active" ? "Aktiv" : "Deaktiv"}
                     </div>
                   </td>
-
-                  {/* 4. Əməliyyatlar */}
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
@@ -194,7 +170,6 @@ export const SliderPage = () => {
               ))}
             </tbody>
           </table>
-
           {data.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
               <ImageIcon className="w-12 h-12 mb-3 opacity-20" />

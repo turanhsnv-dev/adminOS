@@ -11,14 +11,12 @@ import { Button } from "../../../components/ui/button/button";
 import { Input } from "../../../components/ui/input/input";
 import { cn } from "../../../lib/utils";
 
-// Dil seçimləri
 type Language = "az" | "en" | "ru";
 
 export const AboutPage = () => {
   const [activeLang, setActiveLang] = useState<Language>("az");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Demo Data (Formanın içi dolu gəlsin deyə)
   const [formData, setFormData] = useState({
     image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=500&q=80",
     az: { title: "BineAgro Haqqında", content: "Biz kənd təsərrüfatı sahəsində 10 illik təcrübəyə malikik..." },
@@ -28,15 +26,14 @@ export const AboutPage = () => {
 
   const handleSave = () => {
     setIsLoading(true);
-    // Simulyasiya: API sorğusu gedir...
     setTimeout(() => setIsLoading(false), 1500);
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
+    <div className="space-y-8 animate-in fade-in duration-500 w-full h-[calc(100vh-140px)] flex flex-col">
       
       {/* --- HEADER --- */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/40 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/40 pb-6 shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
             Haqqımızda Bölməsi
@@ -54,70 +51,75 @@ export const AboutPage = () => {
         </Button>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      {/* GRID: items-stretch (Hər iki tərəf eyni boyda olsun) */}
+      <div className="grid gap-8 lg:grid-cols-2 flex-1 min-h-0">
           
-          {/* SOL TƏRƏF: Şəkil Yükləmə */}
-          <div className="lg:col-span-1 space-y-4">
-              <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl p-5 shadow-sm">
-                  <h3 className="font-semibold mb-4 flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-primary dark:text-neon" />
+          {/* --- SOL TƏRƏF: ŞƏKİL --- */}
+          <div className="h-[600px]">
+              <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl p-5 shadow-sm h-full flex flex-col relative overflow-hidden group">
+                  
+                  {/* Başlıq */}
+                  <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg shrink-0">
+                      <ImageIcon className="w-5 h-5 text-primary dark:text-neon" />
                       Qapaq Şəkli
                   </h3>
                   
-                  {/* Şəkil Preview */}
-                  <div className="aspect-video w-full rounded-xl overflow-hidden border border-black/10 dark:border-white/10 relative group mb-4 bg-muted">
-                      <img src={formData.image} alt="About" className="w-full h-full object-cover" />
+                  {/* Şəkil Sahəsi - Flex-1 (Bütün yeri tutsun) */}
+                  <div className="relative w-full flex-1 rounded-xl overflow-hidden border border-black/10 dark:border-white/10 bg-muted shadow-md cursor-pointer">
+                      <img src={formData.image} alt="About" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       
                       {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <p className="text-white text-xs font-medium">Dəyişmək üçün klikləyin</p>
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-[2px] z-10">
+                          <Upload className="w-10 h-10 text-white mb-2" />
+                          <p className="text-white font-medium text-lg">Şəkli Dəyiş</p>
+                          <p className="text-white/70 text-sm">Klikləyərək yükləyin</p>
                       </div>
+
+                      {/* INPUT FILE - Bütün şəkli və qutunu əhatə edir */}
+                      <input 
+                        type="file" 
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
+                        title="Şəkil seçmək üçün klikləyin"
+                      />
                   </div>
 
-                  {/* Upload Button */}
-                  <div className="relative">
-                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                    <Button variant="outline" className="w-full border-dashed border-2">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Yeni Şəkil Seç
-                    </Button>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground text-center mt-2">
-                      PNG, JPG və ya WebP. Maksimum 2MB.
+                  {/* Alt Məlumat */}
+                  <p className="text-xs text-muted-foreground text-center mt-4 shrink-0">
+                      PNG, JPG və ya WebP formatı. Maksimum 5MB.
                   </p>
               </div>
           </div>
 
-          {/* SAĞ TƏRƏF: Mətn və Dillər */}
-          <div className="lg:col-span-2 space-y-6">
-              <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl p-6 shadow-sm">
+          {/* --- SAĞ TƏRƏF: MƏTN --- */}
+          <div className="h-[600px]">
+              <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl p-6 shadow-sm h-full flex flex-col">
                   
-                  {/* DİL TABLARI */}
-                  <div className="flex items-center gap-2 mb-6 p-1 bg-black/5 dark:bg-white/5 rounded-xl w-fit">
+                  {/* Dil Tabları */}
+                  <div className="flex items-center gap-2 mb-6 p-1.5 bg-black/5 dark:bg-zinc-950/50 rounded-xl w-full border border-black/5 dark:border-white/5 shrink-0">
                       {(["az", "en", "ru"] as Language[]).map((lang) => (
                           <button
                               key={lang}
                               onClick={() => setActiveLang(lang)}
                               className={cn(
-                                  "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 uppercase flex items-center gap-2",
+                                  "flex-1 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 uppercase flex items-center justify-center gap-2",
                                   activeLang === lang 
-                                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-sm scale-100" 
+                                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-sm scale-100 font-bold" 
                                       : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 scale-95"
                               )}
                           >
-                              <Globe className="w-3 h-3" />
+                              <Globe className="w-3.5 h-3.5" />
                               {lang}
                           </button>
                       ))}
                   </div>
 
-                  {/* FORM INPUTLARI */}
-                  <div className="space-y-4 animate-in fade-in slide-in-from-left-2 duration-300" key={activeLang}>
+                  {/* Form */}
+                  <div className="space-y-5 flex-1 flex flex-col animate-in fade-in slide-in-from-right-4 duration-300" key={activeLang}>
                       
-                      {/* Başlıq Input */}
-                      <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-                              <Type className="w-4 h-4" />
+                      {/* Başlıq (Sabit) */}
+                      <div className="space-y-2.5 shrink-0">
+                          <label className="text-sm font-medium flex items-center gap-2 text-foreground">
+                              <Type className="w-4 h-4 text-primary dark:text-neon" />
                               Başlıq ({activeLang.toUpperCase()})
                           </label>
                           <Input 
@@ -126,26 +128,25 @@ export const AboutPage = () => {
                                   ...formData, 
                                   [activeLang]: { ...formData[activeLang], title: e.target.value }
                               })}
-                              className="bg-white/50 dark:bg-zinc-900/50"
+                              className="bg-white/50 dark:bg-zinc-950/50 h-12 text-lg font-medium"
                           />
                       </div>
 
-                      {/* Məzmun Textarea */}
-                      <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-                              <FileText className="w-4 h-4" />
+                      {/* Məzmun - FLEX-1 (Bu hissə uzanacaq) */}
+                      <div className="space-y-2.5 flex-1 flex flex-col">
+                          <label className="text-sm font-medium flex items-center gap-2 text-foreground">
+                              <FileText className="w-4 h-4 text-primary dark:text-neon" />
                               Məzmun ({activeLang.toUpperCase()})
                           </label>
                           <textarea 
-                              rows={6}
                               value={formData[activeLang].content}
                               onChange={(e) => setFormData({
                                   ...formData, 
                                   [activeLang]: { ...formData[activeLang], content: e.target.value }
                               })}
                               className={cn(
-                                  "flex w-full rounded-xl border border-input bg-white/50 dark:bg-zinc-900/50 px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground",
-                                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring"
+                                  "flex-1 w-full rounded-xl border border-input bg-white/50 dark:bg-zinc-950/50 px-4 py-3 text-base shadow-sm transition-all placeholder:text-muted-foreground resize-none",
+                                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
                               )}
                           />
                       </div>

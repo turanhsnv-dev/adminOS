@@ -1,9 +1,27 @@
-import { Moon, Sun, Bell, Search } from "lucide-react";
+import { useLocation, Link } from "react-router-dom"; // Link import edildi
+import { Moon, Sun, Bell, ChevronRight, Home } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
 export const Header = () => {
   const toggleTheme = () => {
     document.documentElement.classList.toggle("dark");
+  };
+
+  const location = useLocation();
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+
+  const pathMap: Record<string, string> = {
+    "dashboard": "Ana Panel",
+    "home": "Əsas Səhifə",
+    "products": "Məhsullar",
+    "slider": "Slider",
+    "partners": "Tərəfdaşlar",
+    "about": "Haqqımızda",
+    "news": "Xəbərlər",
+    "blogs": "Bloqlar",
+    "settings": "Ayarlar",
+    "users": "İstifadəçilər",
+    "store": "Mağaza"
   };
 
   return (
@@ -14,13 +32,38 @@ export const Header = () => {
       "shadow-sm shadow-black/5 dark:shadow-black/20",
       "border border-black/5 dark:border-white/5"
     )}>
-      <div className="flex items-center gap-3 px-3 py-2 rounded-xl w-full max-w-md transition-all group">
-         <Search className="w-5 h-5 text-muted-foreground group-focus-within:text-primary dark:group-focus-within:text-neon transition-colors" />
-         <input 
-            type="text" 
-            placeholder="Axtarış..." 
-            className="bg-transparent border-none outline-none text-sm w-full placeholder:text-muted-foreground/70 text-foreground"
-         />
+      
+      <div className="flex items-center gap-2 text-sm font-medium">
+         <Link 
+            to="/dashboard" 
+            className="p-1.5 rounded-lg bg-primary/5 text-primary dark:text-neon dark:bg-neon/10 hover:bg-primary/10 dark:hover:bg-neon/20 transition-colors"
+         >
+            <Home className="w-4 h-4" />
+         </Link>
+         <div className="flex items-center text-muted-foreground">
+            {pathSegments.map((segment, index) => {
+              const isLast = index === pathSegments.length - 1;
+              const name = pathMap[segment] || segment;
+              const to = `/${pathSegments.slice(0, index + 1).join("/")}`;
+              return (
+                <div key={index} className="flex items-center">
+                  <ChevronRight className="w-4 h-4 mx-1 opacity-50" />
+                  {isLast ? (
+                     <span className="text-foreground font-semibold capitalize cursor-default">
+                        {name}
+                     </span>
+                  ) : (
+                     <Link 
+                        to={to} 
+                        className="hover:text-foreground hover:underline underline-offset-4 transition-all capitalize"
+                     >
+                        {name}
+                     </Link>
+                  )}
+                </div>
+              );
+            })}
+         </div>
       </div>
       <div className="flex items-center gap-2">
         <button className={cn(

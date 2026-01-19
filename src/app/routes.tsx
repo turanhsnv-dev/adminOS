@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { DashboardLayout } from "../layouts/dashboard-layout";
 import { LoadingSpinner } from "../components/ui/loading-spinner/loading-spinner";
 
-const DashboardHome = lazy(() => import("../pages/dashboard/home").then(m => ({ default: m.DashboardHome })));
+const DashboardHome = lazy(() => import("../features/dashboard/dashboard-page").then(m => ({ default: m.DashboardHome })));
 const LoginPage = lazy(() => import("../features/auth/login-page").then(m => ({ default: m.LoginPage })));
 const SliderPage = lazy(() => import("../features/home/slider/slider-page").then(m => ({ default: m.SliderPage })));
 const PartnersPage = lazy(() => import("../features/home/partners/partners-page").then(m => ({ default: m.PartnersPage })));

@@ -28,12 +28,14 @@ export const DashboardLayout = () => {
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
       />
 
-      <div 
-        className={cn(
-          "flex-1 flex flex-col min-h-screen transition-all duration-300 relative",
-          isSidebarOpen ? "ml-[280px]" : "ml-28"
-        )}
-      >
+<div 
+  className={cn(
+    "flex-1 flex flex-col min-h-screen relative",
+    // Yalnız margin-left animasiya olsun, rənglər yox!
+    "transition-[margin-left] duration-300 ease-in-out", 
+    isSidebarOpen ? "ml-[280px]" : "ml-28"
+  )}
+>
         <Header />
         
         {/* Məzmun sahəsi */}

@@ -14,7 +14,7 @@ export const StatsCard = ({ title, value, trend, trendUp, icon: Icon }: StatsCar
     <div className={cn(
       "p-6 rounded-2xl transition-all duration-300 group",
       // GLASS EFFECT & BORDER
-      "bg-white/60 dark:bg-card/40 backdrop-blur-md",
+      "bg-white/60 dark:bg-card/10 backdrop-blur-md",
       "border border-black/5 dark:border-white/5",
       "shadow-sm hover:shadow-md dark:shadow-black/20"
     )}>

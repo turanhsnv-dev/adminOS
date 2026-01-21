@@ -91,14 +91,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     <aside 
       className={cn(
         "fixed left-4 top-4 bottom-4 z-40 rounded-2xl flex flex-col",
-        // DƏYİŞİKLİK: Transition kodları silindi.
         "shadow-xl shadow-black/5 dark:shadow-black/20",
         "border border-black/5 dark:border-white/10",
         "bg-white/80 dark:bg-zinc-900/90 backdrop-blur-xl", 
         isOpen ? "w-64" : "w-20"
       )}
     >
-      {/* 1. LOGO */}
       <div className={cn(
         "h-20 flex items-center relative",
         isOpen ? "justify-start px-6" : "justify-center"
@@ -128,7 +126,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         </button>
       </div>
 
-      {/* 2. MENYU */}
       <div className="flex-1 py-4 px-3 space-y-2 overflow-y-auto overflow-x-hidden custom-scrollbar">
         {menuItems.map((item) => {
           const isActive = item.url ? location.pathname === item.url : false;

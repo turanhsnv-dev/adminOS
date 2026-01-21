@@ -8,6 +8,14 @@ import {
   Package
 } from "lucide-react";
 import { Button } from "../../../components/ui/button/button";
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableHead, 
+  TableRow, 
+  TableCell 
+} from "../../../components/ui/table/table";
 import { cn } from "../../../lib/utils";
 
 interface Product {
@@ -18,27 +26,26 @@ interface Product {
   status: "active" | "inactive";
 }
 
-// Dummy Data
 const initialData: Product[] = [
   { id: 1, image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=150&q=80", name: "Quba Alması (Qızıləhməd)", category: "Meyvələr", status: "active" },
   { id: 2, image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80", name: "Zirə Pomidoru", category: "Tərəvəzlər", status: "active" },
   { id: 3, image: "https://images.unsplash.com/photo-1628352081506-83c43123ed6d?w=150&q=80", name: "Azot Gübrəsi (N46)", category: "Gübrələr", status: "inactive" },
-  { id: 4, image: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?w=150&q=80", name: "İstixana Xiyarı", category: "Tərəvəzlər", status: "active" },
+  { id: 4, image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=150&q=80", name: "İstixana Xiyarı", category: "Tərəvəzlər", status: "active" },
 ];
-
+  
 export const ProductList = () => {
   const [data] = useState<Product[]>(initialData);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       
-      {/* --- HEADER --- */}
+      {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
             Məhsullar
           </h1>
-          <p className="text-muted-foreground mt-1">Saytdakı bütün məhsulların siyahısı və idarə edilməsi.</p>
+          <p className="text-muted-foreground mt-1">Saytdakı bütün məhsulların siyahısı ve idarə edilməsi.</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -49,37 +56,35 @@ export const ProductList = () => {
         </div>
       </div>
 
-      {/* --- TABLE --- */}
+      {/* TABLE KULLANIMI */}
       <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl shadow-xl shadow-black/5 overflow-hidden">
-        <div className="w-full overflow-x-auto">
-            <table className="w-full text-sm text-left">
-            
-            {/* THEAD: divide-x ile sütunlar arasına çizgi ekledik */}
-            <thead className="text-xs font-medium text-muted-foreground uppercase border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
-                <tr className="divide-x divide-black/5 dark:divide-white/5">
-                    <th className="px-6 py-5 tracking-wider w-[80px] text-center">#ID</th>
-                    <th className="px-6 py-5 tracking-wider">Məhsul</th>
-                    <th className="px-6 py-5 tracking-wider">Kateqoriya</th>
-                    <th className="px-6 py-5 tracking-wider whitespace-nowrap text-center">Status</th>
-                    <th className="px-6 py-5 tracking-wider text-right">Əməliyyatlar</th>
-                </tr>
-            </thead>
+        
+        {/* Yeni Component Kullanımı Başlıyor */}
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-[80px] text-center">#ID</TableHead>
+                    <TableHead>Məhsul</TableHead>
+                    <TableHead>Kateqoriya</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
+                    <TableHead className="text-right">Əməliyyatlar</TableHead>
+                </TableRow>
+            </TableHeader>
 
-            <tbody className="divide-y divide-black/5 dark:divide-white/5">
+            <TableBody>
                 {data.map((item) => (
-                <tr key={item.id} className="group hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200">
+                <TableRow key={item.id} className="group">
                     
-                    {/* 1. ID Sütunu (YENİ) */}
-                    <td className="px-6 py-4 text-center">
+                    {/* ID */}
+                    <TableCell className="text-center">
                         <span className="font-mono text-muted-foreground font-semibold bg-black/5 dark:bg-white/10 px-2 py-1 rounded text-xs">
                             {item.id}
                         </span>
-                    </td>
+                    </TableCell>
 
-                    {/* 2. Məhsul (Şəkil + Ad) - ID buradan silindi */}
-                    <td className="px-6 py-4">
+                    {/* Məhsul */}
+                    <TableCell>
                        <div className="flex items-center gap-4">
-                           {/* Şəkil */}
                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-sm relative shrink-0 bg-white group-hover:scale-105 transition-transform">
                               {item.image ? (
                                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
@@ -87,23 +92,21 @@ export const ProductList = () => {
                                  <Package className="w-5 h-5 text-muted-foreground m-auto" />
                               )}
                            </div>
-                           
-                           {/* Ad (Artık altında ID yazmıyor) */}
                            <div>
                                <p className="font-semibold text-foreground text-sm">{item.name}</p>
                            </div>
                        </div>
-                    </td>
+                    </TableCell>
 
-                    {/* 3. Kateqoriya */}
-                    <td className="px-6 py-4">
+                    {/* Kateqoriya */}
+                    <TableCell>
                         <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-primary/5 text-primary dark:text-neon dark:bg-neon/10 border border-primary/10 dark:border-neon/10">
                             {item.category}
                         </span>
-                    </td>
+                    </TableCell>
 
-                    {/* 4. Status */}
-                    <td className="px-6 py-4 text-center">
+                    {/* Status */}
+                    <TableCell className="text-center">
                         <div className={cn(
                             "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border transition-colors",
                             item.status === "active"
@@ -116,13 +119,12 @@ export const ProductList = () => {
                             )}></span>
                             {item.status === "active" ? "Aktiv" : "Gizli"}
                         </div>
-                    </td>
+                    </TableCell>
 
-                    {/* 5. Əməliyyatlar */}
-                    <td className="px-6 py-4 text-right">
+                    {/* Əməliyyatlar */}
+                    <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                            <button 
-                                className={cn(
+                            <button className={cn(
                                     "w-8 h-8 flex items-center justify-center rounded-lg border transition-all duration-200",
                                     item.status === "active"
                                         ? "text-emerald-600 border-emerald-200 bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
@@ -140,13 +142,12 @@ export const ProductList = () => {
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
-                    </td>
+                    </TableCell>
 
-                </tr>
+                </TableRow>
                 ))}
-            </tbody>
-            </table>
-        </div>
+            </TableBody>
+        </Table>
       </div>
     </div>
   );

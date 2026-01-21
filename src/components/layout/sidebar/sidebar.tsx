@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         "fixed left-4 top-4 bottom-4 z-40 rounded-2xl flex flex-col",
         "shadow-xl shadow-black/5 dark:shadow-black/20",
         "border border-black/5 dark:border-white/10",
-        "bg-white/80 dark:bg-zinc-900/90 backdrop-blur-xl", 
+        "bg-white/80 dark:bg-zinc-900/95 backdrop-blur-xl", 
         isOpen ? "w-64" : "w-20"
       )}
     >

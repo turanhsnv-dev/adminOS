@@ -5,7 +5,7 @@ import {
   Trash2, 
   Type,
   Upload,
-  AlertTriangle, // Uyarı ikonu
+  AlertTriangle,
   Image as ImageIcon
 } from "lucide-react";
 import { Button } from "../../../components/ui/button/button";
@@ -18,21 +18,56 @@ import {
   TableHead, 
   TableRow, 
   TableCell 
-} from "../../../components/ui/table/table";  
+} from "../../../components/ui/table/table";
 import { cn } from "../../../lib/utils";
+
+// 1. TİP TANIMLAMALARI (Çok Dilli)
+type Language = "az" | "en" | "ru";
 
 interface Partner {
   id: number;
   logo: string;
-  alt: string;
+  // ARTIK OBJE:
+  alt: { 
+      az: string; 
+      en: string; 
+      ru: string; 
+  };
   status: "active" | "inactive";
 }
 
-// Dummy Data
+// 2. DUMMY DATA (Çok Dilli)
 const initialData: Partner[] = [
-  { id: 1, logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg", alt: "Amazon AWS Cloud", status: "active" },
-  { id: 2, logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg", alt: "Google Analytics Partner", status: "active" },
-  { id: 3, logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", alt: "Microsoft Azure", status: "inactive" },
+  { 
+      id: 1, 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg", 
+      alt: {
+          az: "Amazon AWS Cloud",
+          en: "Amazon AWS Cloud",
+          ru: "Amazon AWS Cloud"
+      }, 
+      status: "active" 
+  },
+  { 
+      id: 2, 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg", 
+      alt: {
+          az: "Google Analitika Partnyoru",
+          en: "Google Analytics Partner",
+          ru: "Партнер Google Analytics"
+      }, 
+      status: "active" 
+  },
+  { 
+      id: 3, 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", 
+      alt: {
+          az: "Microsoft Azure",
+          en: "Microsoft Azure",
+          ru: "Microsoft Azure"
+      }, 
+      status: "inactive" 
+  },
 ];
 
 export const PartnersPage = () => {
@@ -46,9 +81,16 @@ export const PartnersPage = () => {
   // Form Verileri
   const [editingId, setEditingId] = useState<number | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [altText, setAltText] = useState("");
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   
+  // DİL YÖNETİMİ
+  const [activeLang, setActiveLang] = useState<Language>("az");
+  const [altText, setAltText] = useState<{ az: string; en: string; ru: string }>({
+      az: "",
+      en: "",
+      ru: ""
+  });
+  
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // --- DOSYA SEÇİMİ ---
@@ -64,17 +106,17 @@ export const PartnersPage = () => {
   const handleEdit = (item: Partner) => {
       setEditingId(item.id);
       setPreviewUrl(item.logo);
-      setAltText(item.alt);
+      setAltText(item.alt); // Veritabanındaki çok dilli veriyi al
+      setActiveLang("az");  // Varsayılan dil
       setIsFormModalOpen(true);
   };
 
-  // --- SİLME BUTONUNA BASINCA ---
+  // --- SİLME (Delete) ---
   const onDeleteClick = (id: number) => {
       setDeleteId(id);
       setIsDeleteModalOpen(true);
   };
 
-  // --- SİLME İŞLEMİ (Action) ---
   const confirmDelete = () => {
       if (!deleteId) return;
       setIsSaving(true);
@@ -86,9 +128,10 @@ export const PartnersPage = () => {
       }, 1000);
   };
 
-  // --- KAYDETME (Create/Update) ---
+  // --- KAYDETME (Save) ---
   const handleSave = () => {
-    if (!previewUrl || !altText) return;
+    if (!previewUrl || !altText.az) return; // En azından AZ dili dolu olmalı
+
     setIsSaving(true);
     setTimeout(() => {
         if (editingId) {
@@ -103,7 +146,7 @@ export const PartnersPage = () => {
             const newPartner: Partner = { 
                 id: Date.now(), 
                 logo: previewUrl, 
-                alt: altText, 
+                alt: altText, // Tüm diller
                 status: "active" 
             };
             setData([newPartner, ...data]);
@@ -118,8 +161,9 @@ export const PartnersPage = () => {
       setIsFormModalOpen(false);
       setTimeout(() => {
           setPreviewUrl(null);
-          setAltText("");
+          setAltText({ az: "", en: "", ru: "" }); // Formu temizle
           setEditingId(null);
+          setActiveLang("az");
       }, 300);
   };
 
@@ -152,7 +196,7 @@ export const PartnersPage = () => {
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-[120px]">Loqo</TableHead>
-                    <TableHead>Partner Adı / Alt</TableHead>
+                    <TableHead>Partner Adı (AZ)</TableHead>
                     <TableHead className="text-center">Status</TableHead>
                     <TableHead className="text-right">Əməliyyatlar</TableHead>
                 </TableRow>
@@ -164,24 +208,23 @@ export const PartnersPage = () => {
                     
                     {/* LOQO */}
                     <TableCell>
-                       <div className="w-35 h-12 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-sm relative group-hover:scale-105 transition-transform duration-300 bg-white flex items-center justify-center p-2">
+                       <div className="w-20 h-12 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-sm relative group-hover:scale-105 transition-transform duration-300 bg-white flex items-center justify-center p-2">
                           {item.logo ? (
-                             // Burada object-contain kullandık ki logo kesilmesin
-                             <img src={item.logo} alt={item.alt} className="max-w-full max-h-full object-contain" />
+                             <img src={item.logo} alt={item.alt.az} className="max-w-full max-h-full object-contain" />
                           ) : (
                              <ImageIcon className="w-5 h-5 text-muted-foreground" />
                           )}
                        </div>
                     </TableCell>
 
-                    {/* TEXT */}
+                    {/* TEXT (Sadece AZ) */}
                     <TableCell>
                         <div className="flex items-center gap-3">
                              <div className="p-2 rounded-lg bg-primary/5 text-primary dark:text-neon dark:bg-neon/10 shrink-0 border border-primary/10 dark:border-neon/10">
                                 <Type className="w-4 h-4" />
                              </div>
                              <span className="font-medium text-foreground text-sm line-clamp-2">
-                                {item.alt}
+                                {item.alt.az}
                              </span>
                         </div>
                     </TableCell>
@@ -241,7 +284,7 @@ export const PartnersPage = () => {
       >
           <div className="space-y-6">
               
-              {/* Logo Yükleme Alanı */}
+              {/* Logo Yükleme */}
               <div className="space-y-2">
                   <label className="text-sm font-medium">Şirkət Loqosu</label>
                   <div 
@@ -263,7 +306,6 @@ export const PartnersPage = () => {
 
                       {previewUrl ? (
                           <>
-                             {/* Preview'de de logoların tam görünmesi için object-contain kullandık */}
                              <img src={previewUrl} alt="Preview" className="w-full h-full object-contain p-4" />
                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                  <p className="text-white font-medium flex items-center gap-2">
@@ -278,44 +320,66 @@ export const PartnersPage = () => {
                              </div>
                              <div className="text-center">
                                 <p className="text-sm font-medium text-foreground">Loqo yükləyin</p>
-                                <p className="text-xs text-muted-foreground mt-1">PNG (Transparan) tövsiyə olunur</p>
+                                <p className="text-xs text-muted-foreground mt-1">PNG (Transparan)</p>
                              </div>
                           </>
                       )}
                   </div>
               </div>
 
-              {/* Text Input */}
-              <Input 
-                label="Partner Adı / Alt Mətn" 
-                placeholder="Örn: Microsoft Azerbaijan"
-                value={altText}
-                onChange={(e) => setAltText(e.target.value)}
-              />
+              {/* --- ÇOK DİLLİ INPUT --- */}
+              <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                          Partner Adı
+                      </label>
+                      
+                      {/* DİL SEKMELERİ */}
+                      <div className="flex bg-muted p-1 rounded-lg">
+                          {(["az", "en", "ru"] as Language[]).map((lang) => (
+                              <button
+                                  key={lang}
+                                  onClick={() => setActiveLang(lang)}
+                                  className={cn(
+                                      "px-3 py-1 text-xs font-bold uppercase rounded-md transition-all",
+                                      activeLang === lang 
+                                          ? "bg-background text-foreground shadow-sm" 
+                                          : "text-muted-foreground hover:text-foreground"
+                                  )}
+                              >
+                                  {lang}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+
+                  <div className="relative">
+                      <Input 
+                        placeholder={`Şirkət adı (${activeLang.toUpperCase()})`}
+                        value={altText[activeLang]}
+                        onChange={(e) => setAltText({
+                            ...altText,
+                            [activeLang]: e.target.value
+                        })}
+                        className="pr-10"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none uppercase text-xs font-bold opacity-50">
+                          {activeLang}
+                      </div>
+                  </div>
+              </div>
 
               {/* Butonlar */}
               <div className="flex items-center gap-3 pt-2">
-                  <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={closeFormModal}
-                    disabled={isSaving}
-                  >
-                      Ləğv et
-                  </Button>
-                  <Button 
-                    className="w-full dark:bg-neon dark:text-black dark:hover:bg-neon/90" 
-                    onClick={handleSave}
-                    disabled={!previewUrl || !altText || isSaving}
-                    isLoading={isSaving}
-                  >
+                  <Button variant="outline" className="w-full" onClick={closeFormModal} disabled={isSaving}>Ləğv et</Button>
+                  <Button className="w-full dark:bg-neon dark:text-black dark:hover:bg-neon/90" onClick={handleSave} disabled={!previewUrl || !altText.az || isSaving} isLoading={isSaving}>
                       {isSaving ? "Yadda saxlanılır..." : (editingId ? "Yenilə" : "Yadda Saxla")}
                   </Button>
               </div>
           </div>
       </Modal>
 
-      {/* --- SİLME ONAY MODALI --- */}
+      {/* --- SİLME MODALI --- */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -332,21 +396,8 @@ export const PartnersPage = () => {
                 </p>
              </div>
              <div className="flex items-center gap-3 w-full pt-4">
-                 <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={() => setIsDeleteModalOpen(false)}
-                    disabled={isSaving}
-                 >
-                    Ləğv et
-                 </Button>
-                 <Button 
-                    className="w-full bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700 shadow-lg shadow-red-500/20" 
-                    onClick={confirmDelete}
-                    isLoading={isSaving}
-                 >
-                    Bəli, Sil
-                 </Button>
+                 <Button variant="outline" className="w-full" onClick={() => setIsDeleteModalOpen(false)} disabled={isSaving}>Ləğv et</Button>
+                 <Button className="w-full bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700 shadow-lg shadow-red-500/20" onClick={confirmDelete} isLoading={isSaving}>Bəli, Sil</Button>
              </div>
          </div>
       </Modal>

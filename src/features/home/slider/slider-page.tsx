@@ -5,7 +5,7 @@ import {
   Trash2,
   Type,
   Upload,
-  AlertTriangle // Uyarı ikonu eklendi
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../../components/ui/button/button";
 import { Input } from "../../../components/ui/input/input";
@@ -20,24 +20,41 @@ import {
 } from "../../../components/ui/table/table";
 import { cn } from "../../../lib/utils";
 
+// 1. TİP TANIMLAMALARI
+type Language = "az" | "en" | "ru";
+
 interface Slider {
   id: number;
   image: string;
-  alt: string;
+  // ARTIK TEK BİR STRİNG DEĞİL, OBJE:
+  alt: { 
+      az: string; 
+      en: string; 
+      ru: string; 
+  };
   status: "active" | "inactive";
 }
 
+// 2. DUMMY DATA (Çok dilli yapıya uygun)
 const initialData: Slider[] = [
   {
     id: 1,
     image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=150&q=80",
-    alt: "Qızıləhməd alması kampaniya banneri",
+    alt: {
+        az: "Qızıləhməd alması kampaniyası",
+        en: "Gizil Ahmed apple campaign",
+        ru: "Кампания яблок Гызылахмед"
+    },
     status: "active",
   },
   {
     id: 2,
     image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80",
-    alt: "Mövsümi tərəvəzlər ümumi görüntü",
+    alt: {
+        az: "Mövsümi tərəvəzlər",
+        en: "Seasonal vegetables",
+        ru: "Сезонные овощи"
+    },
     status: "active",
   },
 ];
@@ -45,19 +62,27 @@ const initialData: Slider[] = [
 export const SliderPage = () => {
   const [data, setData] = useState<Slider[]>(initialData);
   
-  // --- STATE YÖNETİMİ ---
-  // 1. Form Modalı için
+  // Modal States
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Form Data States
   const [editingId, setEditingId] = useState<number | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [altText, setAltText] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // 2. Silme Modalı için (YENİ)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  // YENİ: Aktif Dili Seçmek İçin State
+  const [activeLang, setActiveLang] = useState<Language>("az");
+  
+  // YENİ: Input Değerleri (Obje olarak tutuyoruz)
+  const [altText, setAltText] = useState<{ az: string; en: string; ru: string }>({
+      az: "",
+      en: "",
+      ru: ""
+  });
+  
   const [deleteId, setDeleteId] = useState<number | null>(null);
-
-  const [isSaving, setIsSaving] = useState(false); // Yükleniyor durumu
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Dosya Seçme
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,43 +93,54 @@ export const SliderPage = () => {
     }
   };
 
-  // --- DÜZENLEME (Edit) ---
+  // --- EDIT ---
   const handleEdit = (item: Slider) => {
       setEditingId(item.id);
       setPreviewUrl(item.image);
-      setAltText(item.alt);
+      setAltText(item.alt); // Veritabanındaki çok dilli veriyi state'e atıyoruz
+      setActiveLang("az");  // Edit açılınca varsayılan dil AZ olsun
       setIsFormModalOpen(true);
   };
 
-  // --- SİLME BUTONUNA BASINCA (Onay Modalı Aç) ---
+  // --- DELETE ---
   const onDeleteClick = (id: number) => {
-      setDeleteId(id);            // Hangi ID silinecek?
-      setIsDeleteModalOpen(true); // Modalı aç
+      setDeleteId(id);
+      setIsDeleteModalOpen(true);
   };
 
-  // --- SİLME İŞLEMİNİ GERÇEKLEŞTİR (Action) ---
   const confirmDelete = () => {
       if (!deleteId) return;
-      
-      setIsSaving(true); // Butonu loading yap
-      
+      setIsSaving(true);
       setTimeout(() => {
           setData(data.filter((item) => item.id !== deleteId));
           setIsSaving(false);
-          setIsDeleteModalOpen(false); // Modalı kapat
+          setIsDeleteModalOpen(false);
           setDeleteId(null);
-      }, 1000); // 1 saniye bekle (gerçekçilik için)
+      }, 1000);
   };
 
-  // --- KAYDETME ---
+  // --- SAVE ---
   const handleSave = () => {
-    if (!previewUrl || !altText) return;
+    // Validasyon: En azından AZ dili dolu olmalı
+    if (!previewUrl || !altText.az) return;
+
     setIsSaving(true);
     setTimeout(() => {
         if (editingId) {
-            setData(data.map(item => item.id === editingId ? { ...item, image: previewUrl, alt: altText } : item));
+            // Update
+            setData(data.map(item => 
+                item.id === editingId 
+                ? { ...item, image: previewUrl, alt: altText } 
+                : item
+            ));
         } else {
-            const newSlider: Slider = { id: Date.now(), image: previewUrl, alt: altText, status: "active" };
+            // Create
+            const newSlider: Slider = { 
+                id: Date.now(), 
+                image: previewUrl, 
+                alt: altText, // Tüm dillerdeki veriyi kaydediyoruz
+                status: "active" 
+            };
             setData([newSlider, ...data]);
         }
         setIsSaving(false);
@@ -112,13 +148,14 @@ export const SliderPage = () => {
     }, 1000);
   };
 
-  // Form Modalını Kapat ve Temizle
   const closeFormModal = () => {
       setIsFormModalOpen(false);
       setTimeout(() => {
           setPreviewUrl(null);
-          setAltText("");
+          // Formu sıfırla
+          setAltText({ az: "", en: "", ru: "" });
           setEditingId(null);
+          setActiveLang("az");
       }, 300);
   };
 
@@ -146,13 +183,13 @@ export const SliderPage = () => {
         </div>
       </div>
 
-      {/* TABLO */}
+      {/* TABLE */}
       <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white/80 dark:bg-zinc-900/95 backdrop-blur-xl shadow-xl shadow-black/5 overflow-hidden">
         <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[150px]">Görüntü</TableHead>
-                <TableHead>Alternativ Mətn (Alt)</TableHead>
+                <TableHead>Alternativ Mətn (AZ)</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Əməliyyatlar</TableHead>
               </TableRow>
@@ -162,7 +199,7 @@ export const SliderPage = () => {
                 <TableRow key={item.id} className="group">
                   <TableCell>
                     <div className="w-24 h-14 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-sm relative group-hover:scale-105 transition-transform duration-300">
-                      <img src={item.image} alt={item.alt} className="w-full h-full object-cover" />
+                      <img src={item.image} alt={item.alt.az} className="w-full h-full object-cover" />
                     </div>
                   </TableCell>
                   <TableCell>
@@ -170,7 +207,10 @@ export const SliderPage = () => {
                       <div className="p-2 rounded-lg bg-primary/5 text-primary dark:text-neon dark:bg-neon/10 shrink-0 border border-primary/10 dark:border-neon/10">
                         <Type className="w-4 h-4" />
                       </div>
-                      <span className="font-medium text-foreground text-sm line-clamp-2">{item.alt}</span>
+                      {/* Tabloda sadece AZ dilini gösteriyoruz, karışıklık olmasın diye */}
+                      <span className="font-medium text-foreground text-sm line-clamp-2">
+                          {item.alt.az}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
@@ -184,16 +224,10 @@ export const SliderPage = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                        <button 
-                            onClick={() => handleEdit(item)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20 dark:hover:bg-blue-500/20"
-                        >
+                        <button onClick={() => handleEdit(item)} className="w-8 h-8 flex items-center justify-center rounded-lg text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20 dark:hover:bg-blue-500/20">
                              <Pencil className="w-4 h-4" />
                         </button>
-                        <button 
-                            onClick={() => onDeleteClick(item.id)} // Burayı değiştirdik
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 transition-all dark:text-red-400 dark:bg-red-500/10 dark:border-red-500/20 dark:hover:bg-red-500/20"
-                        >
+                        <button onClick={() => onDeleteClick(item.id)} className="w-8 h-8 flex items-center justify-center rounded-lg text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 transition-all dark:text-red-400 dark:bg-red-500/10 dark:border-red-500/20 dark:hover:bg-red-500/20">
                              <Trash2 className="w-4 h-4" />
                         </button>
                     </div>
@@ -204,13 +238,15 @@ export const SliderPage = () => {
         </Table>
       </div>
 
-      {/* --- 1. FORM MODALI (Ekle/Düzenle) --- */}
+      {/* --- FORM MODAL --- */}
       <Modal 
         isOpen={isFormModalOpen} 
         onClose={closeFormModal} 
         title={editingId ? "Slideri Yenilə" : "Yeni Slider Əlavə Et"} 
       >
           <div className="space-y-6">
+              
+              {/* RESİM YÜKLEME ALANI (Aynı kaldı) */}
               <div className="space-y-2">
                   <label className="text-sm font-medium">Slider Görseli</label>
                   <div 
@@ -222,13 +258,7 @@ export const SliderPage = () => {
                             : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-neon/5 dark:hover:border-neon/30"
                     )}
                   >
-                      <input 
-                        ref={fileInputRef}
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleFileChange}
-                      />
+                      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                       {previewUrl ? (
                           <>
                              <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -243,60 +273,84 @@ export const SliderPage = () => {
                              </div>
                              <div className="text-center">
                                 <p className="text-sm font-medium text-foreground">Yükləmək üçün klikləyin</p>
-                                <p className="text-xs text-muted-foreground mt-1">PNG, JPG veya WebP (Max 5MB)</p>
                              </div>
                           </>
                       )}
                   </div>
               </div>
-              <Input label="Alternativ Mətn" placeholder="Örn: Kampaniya" value={altText} onChange={(e) => setAltText(e.target.value)} />
+
+              {/* --- YENİ ÇOK DİLLİ INPUT ALANI --- */}
+              <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                          Alternativ Mətn
+                      </label>
+                      
+                      {/* DİL SEKMELERİ (TAB) */}
+                      <div className="flex bg-muted p-1 rounded-lg">
+                          {(["az", "en", "ru"] as Language[]).map((lang) => (
+                              <button
+                                  key={lang}
+                                  onClick={() => setActiveLang(lang)}
+                                  className={cn(
+                                      "px-3 py-1 text-xs font-bold uppercase rounded-md transition-all",
+                                      activeLang === lang 
+                                          ? "bg-background text-foreground shadow-sm" 
+                                          : "text-muted-foreground hover:text-foreground"
+                                  )}
+                              >
+                                  {lang}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+
+                  <div className="relative">
+                      <Input 
+                        placeholder={`Məsələn: Alma kampaniyası (${activeLang.toUpperCase()})`}
+                        value={altText[activeLang]} // O anki dilin verisini göster
+                        onChange={(e) => setAltText({
+                            ...altText,
+                            [activeLang]: e.target.value // Sadece o anki dili güncelle
+                        })}
+                        className="pr-10" // Sağda ikon için boşluk
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none uppercase text-xs font-bold opacity-50">
+                          {activeLang}
+                      </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground text-right">
+                      {activeLang === 'az' && "Azərbaycan dilində başlıq."}
+                      {activeLang === 'en' && "İngilis dilində başlıq."}
+                      {activeLang === 'ru' && "Rus dilində başlıq."}
+                  </p>
+              </div>
+
+              {/* BUTTONS */}
               <div className="flex items-center gap-3 pt-2">
                   <Button variant="outline" className="w-full" onClick={closeFormModal} disabled={isSaving}>Ləğv et</Button>
-                  <Button className="w-full dark:bg-neon dark:text-black dark:hover:bg-neon/90" onClick={handleSave} disabled={!previewUrl || !altText || isSaving} isLoading={isSaving}>
+                  <Button className="w-full dark:bg-neon dark:text-black dark:hover:bg-neon/90" onClick={handleSave} disabled={!previewUrl || !altText.az || isSaving} isLoading={isSaving}>
                       {isSaving ? "Yadda saxlanılır..." : (editingId ? "Yenilə" : "Yadda Saxla")}
                   </Button>
               </div>
           </div>
       </Modal>
 
-      {/* --- 2. SİLME ONAY MODALI (PREMIUM) --- */}
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        title="Silmək istədiyinizə əminsiniz?"
-      >
+      {/* DELETE MODAL (Aynı kaldı) */}
+      <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Silmək istədiyinizə əminsiniz?">
          <div className="flex flex-col items-center text-center space-y-4 pt-2">
-             
-             {/* Animasyonlu İkon Kutusu */}
              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-2 animate-pulse">
                 <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
              </div>
-
-             {/* Açıklama */}
              <div>
                 <h4 className="text-lg font-semibold text-foreground">Bu slider silinəcək!</h4>
                 <p className="text-sm text-muted-foreground mt-1 max-w-[280px] mx-auto">
-                    Bu əməliyyat geri qaytarıla bilməz. Davam etmək istədiyinizə əminsiniz?
+                    Bu əməliyyat geri qaytarıla bilməz.
                 </p>
              </div>
-
-             {/* Butonlar */}
              <div className="flex items-center gap-3 w-full pt-4">
-                 <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={() => setIsDeleteModalOpen(false)}
-                    disabled={isSaving}
-                 >
-                    Ləğv et
-                 </Button>
-                 <Button 
-                    className="w-full bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700 shadow-lg shadow-red-500/20" 
-                    onClick={confirmDelete}
-                    isLoading={isSaving}
-                 >
-                    Bəli, Sil
-                 </Button>
+                 <Button variant="outline" className="w-full" onClick={() => setIsDeleteModalOpen(false)} disabled={isSaving}>Ləğv et</Button>
+                 <Button className="w-full bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700 shadow-lg shadow-red-500/20" onClick={confirmDelete} isLoading={isSaving}>Bəli, Sil</Button>
              </div>
          </div>
       </Modal>

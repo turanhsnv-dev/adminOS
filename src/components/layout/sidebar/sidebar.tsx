@@ -51,7 +51,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
       icon: ShoppingBag,
       submenu: [
         { title: "Məhsul Siyahısı", url: "/dashboard/products" },
-        { title: "Kateqoriyalar", url: "/dashboard/products/categories" },
       ]
     },
     { 
